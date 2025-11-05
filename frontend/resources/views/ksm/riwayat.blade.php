@@ -25,13 +25,12 @@
     </button>
   </div>
 
-  {{-- Month Year Picker Dialog (Hidden by default) --}}
+  {{-- Month Year Picker Dialog --}}
   <div id="monthYearDialog" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
     <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
       <h3 class="text-lg font-bold mb-4">Pilih Bulan & Tahun</h3>
       
       <div class="space-y-4">
-        {{-- Month Selector --}}
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Bulan</label>
           <select id="monthSelect" class="w-full border border-gray-300 rounded-lg p-2">
@@ -42,7 +41,6 @@
           </select>
         </div>
 
-        {{-- Year Selector --}}
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Tahun</label>
           <select id="yearSelect" class="w-full border border-gray-300 rounded-lg p-2">
@@ -67,7 +65,7 @@
     </div>
   </div>
 
-  {{-- Date Range Picker Dialog (Hidden by default) --}}
+  {{-- Date Range Picker Dialog --}}
   <div id="datePickerDialog" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
     <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
       <h3 class="text-lg font-bold mb-4">Pilih Rentang Tanggal</h3>
@@ -115,74 +113,47 @@
 
   {{-- Data Grid --}}
   <div id="dataGrid" class="grid grid-cols-1 gap-4 mt-6 px-4 md:grid-cols-2 md:gap-5 lg:grid-cols-3 xl:grid-cols-4 lg:px-8">
-    {{-- Sample Card 1 --}}
-    <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 p-4 cursor-pointer" onclick="handleCardClick(1)">
-      <div class="flex items-start justify-between mb-3">
-        <div>
-          <h3 class="font-bold text-lg text-green-900">KSM AJIBARANG</h3>
-          <p class="text-sm text-gray-600">UPKP Ajibarang</p>
-        </div>
-        <span class="bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded">Lengkap</span>
-      </div>
-      <div class="border-t pt-3">
-        <p class="text-sm text-gray-600 mb-2">
-          <span class="font-semibold">Tanggal:</span> 15 Oktober 2025
-        </p>
-        <p class="text-sm text-gray-600">
-          <span class="font-semibold">Total Sampah Masuk:</span> 2.5 m³
-        </p>
-      </div>
-    </div>
+    {{-- Sample Cards --}}
+    <x-card-report-history-ksm
+        upkp-name="UPKP Ajibarang"
+        ksm-name="KSM AJIBARANG"
+        date="2025-10-15"
+        status="verified"
+        :total-sampah-masuk="2.5"
+        :report-id="1"
+    />
 
-    {{-- Sample Card 2 --}}
-    <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 p-4 cursor-pointer" onclick="handleCardClick(2)">
-      <div class="flex items-start justify-between mb-3">
-        <div>
-          <h3 class="font-bold text-lg text-green-900">KSM AJIBARANG</h3>
-          <p class="text-sm text-gray-600">UPKP Ajibarang</p>
-        </div>
-        <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded">Sebagian</span>
-      </div>
-      <div class="border-t pt-3">
-        <p class="text-sm text-gray-600 mb-2">
-          <span class="font-semibold">Tanggal:</span> 14 Oktober 2025
-        </p>
-        <p class="text-sm text-gray-600">
-          <span class="font-semibold">Total Sampah Masuk:</span> 1.8 m³
-        </p>
-      </div>
-    </div>
+    <x-card-report-history-ksm
+        upkp-name="UPKP Ajibarang"
+        ksm-name="KSM AJIBARANG"
+        date="2025-10-14"
+        status="pending"
+        :total-sampah-masuk="1.8"
+        :report-id="2"
+    />
 
-    {{-- Sample Card 3 --}}
-    <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 p-4 cursor-pointer" onclick="handleCardClick(3)">
-      <div class="flex items-start justify-between mb-3">
-        <div>
-          <h3 class="font-bold text-lg text-green-900">KSM AJIBARANG</h3>
-          <p class="text-sm text-gray-600">UPKP Ajibarang</p>
-        </div>
-        <span class="bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded">Lengkap</span>
-      </div>
-      <div class="border-t pt-3">
-        <p class="text-sm text-gray-600 mb-2">
-          <span class="font-semibold">Tanggal:</span> 13 Oktober 2025
-        </p>
-        <p class="text-sm text-gray-600">
-          <span class="font-semibold">Total Sampah Masuk:</span> 3.2 m³
-        </p>
-      </div>
-    </div>
+    <x-card-report-history-ksm
+        upkp-name="UPKP Ajibarang"
+        ksm-name="KSM AJIBARANG"
+        date="2025-10-13"
+        status="verified"
+        :total-sampah-masuk="3.2"
+        :report-id="3"
+    />
   </div>
 
-  {{-- Empty State (Hidden by default) --}}
+  {{-- Empty State --}}
   <div id="emptyState" class="hidden flex flex-col items-center justify-center" style="min-height: calc(100vh - 300px);">
-    <img src="{{ asset('images/empty-data.png') }}" class="w-1/2 bg-cover lg:w-1/4" alt="Tidak ada data">
-    <p class="text-gray-600 mt-4">Tidak ada riwayat laporan</p>
-    <p class="text-sm text-gray-500 mt-2">Periode: <span id="dateRangeText">-</span></p>
+    <svg class="w-32 h-32 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+    </svg>
+    <p class="text-gray-600 font-medium text-lg">Tidak ada riwayat laporan</p>
+    <p class="text-sm text-gray-500 mt-2">Periode: <span id="dateRangeText">{{ date('d F Y') }}</span></p>
   </div>
 
   {{-- Info Footer --}}
   <div class="text-center mt-6 text-sm text-gray-600 pb-8">
-    Menampilkan <span id="dataCount">3</span> tanggal dalam periode yang dipilih
+    Menampilkan <span id="dataCount" class="font-semibold text-green-700">3</span> laporan
   </div>
 </section>
 
@@ -204,7 +175,6 @@ function applyMonthYear() {
     const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     document.getElementById('monthYearLabel').textContent = `${months[month - 1]} ${year}`;
     closeMonthYearPicker();
-    // Here you would normally filter data by month/year
   }
 }
 
@@ -224,13 +194,7 @@ function applyDateRange() {
   if (startDate && endDate) {
     closeDatePicker();
     alert(`Download data dari ${startDate} sampai ${endDate}`);
-    // Here you would normally trigger download
   }
-}
-
-// Card Click Handler
-function handleCardClick(id) {
-  window.location.href = `/detail-report-ksm/${id}`;
 }
 </script>
 @endsection
