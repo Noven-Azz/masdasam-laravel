@@ -1,14 +1,22 @@
-@import "tailwindcss";
-@import "tailwindcss/preflight";
+@tailwind base;
+@tailwind components;
 @tailwind utilities;
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+/* custom base styles (gunakan @layer base) */
+@layer base {
+    :root {
+        --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
+            "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+            "Noto Color Emoji";
+    }
 
-@theme {
-    --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
-        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-        "Noto Color Emoji";
+    /* contoh override global */
+    /* body { font-family: var(--font-sans); } */
 }
+
+/* custom components (jika ada) */
+@layer components {
+    /* .btn-primary { @apply bg-green-900 text-white px-4 py-2 rounded; } */
+}
+
+/* tambahan CSS biasa di sini */

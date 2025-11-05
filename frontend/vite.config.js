@@ -1,13 +1,16 @@
-import { defineConfig } from 'vite';
-import laravel from 'laravel-vite-plugin';
-import tailwindcss from '@tailwindcss/vite';
+import { defineConfig } from "vite";
+import laravel from "laravel-vite-plugin";
 
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: ["resources/css/app.css", "resources/js/app.js"],
             refresh: true,
         }),
-        tailwindcss(),
     ],
+    server: {
+        port: 5174, // ganti port disini (contoh 5174)
+        host: true, // atau '0.0.0.0' untuk expose ke jaringan
+        // hmr: { host: 'localhost' } // optional bila butuh HMR config custom
+    },
 });
