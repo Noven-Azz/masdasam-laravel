@@ -19,6 +19,19 @@ Route::get('/detail-report-ksm/{id}', function ($id) {
     return "Detail Report ID: $id";
 });
 
+Route::get('/dashboard-upkp', function () {
+    return view('upkp.dashboard', ['roleName' => 'UPKP']);
+});
+
+Route::get('/dashboard-dlh', function () {
+    return view('dlh.dashboard', ['roleName' => 'DLH']);
+});
+
+Route::post('/logout', function () {
+    // Handle logout logic
+    return redirect('/login');
+})->name('logout');
+
 Route::get('/profil-ksm', function () {
     // Mock data untuk testing UI (nanti ganti dengan data dari database/API)
     $profile = [
