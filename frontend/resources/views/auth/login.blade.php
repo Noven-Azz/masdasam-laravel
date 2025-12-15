@@ -1,22 +1,17 @@
+
 <!doctype html>
 <html lang="id">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>Login - MASDASAM</title>
 
-  @php $viteDev = env('VITE_DEV_SERVER_URL', 'http://localhost:5173'); @endphp
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-  @if (app()->environment('local'))
-    <script type="module" src="{{ rtrim($viteDev, '/') }}@@vite/client"></script>
-    <script type="module" src="{{ rtrim($viteDev, '/') }}/resources/js/app.js"></script>
-    <link rel="stylesheet" href="{{ rtrim($viteDev, '/') }}/resources/css/app.css">
-  @else
-    <link rel="stylesheet" href="{{ asset('build/assets/app.css') }}">
-    <script type="module" src="{{ asset('build/assets/app.js') }}"></script>
-  @endif
 </head>
 <body class="overflow-hidden">
+  {{-- ...existing code mobile & desktop form... --}}
   <section id="login-ksm" class="flex flex-col w-full h-screen overflow-hidden">
     {{-- MOBILE AND TABLET VIEW --}}
     <div
@@ -42,30 +37,20 @@
     >
       <form
         id="mobileForm"
-        action="{{ route('login') }}"
-        method="POST"
         class="flex flex-col items-center justify-center gap-y-6 mt-[15%]"
       >
-        @csrf
-
-        {{-- Email --}}
         <div class="w-[70%] md:w-[60%]">
           <label for="email-mobile" class="block text-white text-lg mb-2">Email :</label>
           <input
             type="email"
             id="email-mobile"
             name="email"
-            value="{{ old('email') }}"
             placeholder="Masukkan Email"
             required
-            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent @error('email') border-red-500 @enderror"
+            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
           />
-          @error('email')
-            <p class="text-red-200 text-sm mt-1">{{ $message }}</p>
-          @enderror
         </div>
 
-        {{-- Password --}}
         <div class="w-[70%] md:w-[60%]">
           <label for="password-mobile" class="block text-white text-lg mb-2">Password :</label>
           <div class="relative">
@@ -75,7 +60,7 @@
               name="password"
               placeholder="Masukkan Password"
               required
-              class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent @error('password') border-red-500 @enderror"
+              class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
             <button
               type="button"
@@ -88,14 +73,13 @@
               </svg>
             </button>
           </div>
-          @error('password')
-            <p class="text-red-200 text-sm mt-1">{{ $message }}</p>
-          @enderror
         </div>
+
+        <div id="error-mobile" class="w-[70%] md:w-[60%] text-red-300 text-sm hidden"></div>
 
         <button
           type="submit"
-          class="w-[70%] py-4 rounded-xl bg-[#014D37] text-white text-xl font-semibold md:w-[60%] hover:bg-green-900 transition-colors"
+          class="w-[70%] py-4 rounded-xl bg-[#014D37] text-white text-xl font-semibold md:w-[60%] hover:bg-green-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Masuk
         </button>
@@ -110,7 +94,6 @@
         </a>
       </div>
     </div>
-    {{-- END MOBILE AND TABLET VIEW --}}
 
     {{-- DESKTOP VIEW --}}
     <div
@@ -157,30 +140,20 @@
 
             <form
               id="desktopForm"
-              action="{{ route('login') }}"
-              method="POST"
               class="flex flex-col items-center justify-center gap-y-8 mt-[6%]"
             >
-              @csrf
-
-              {{-- Email --}}
               <div class="w-[61%]">
                 <label for="email-desktop" class="block text-white text-lg mb-2">Email :</label>
                 <input
                   type="email"
                   id="email-desktop"
                   name="email"
-                  value="{{ old('email') }}"
                   placeholder="Masukkan Email"
                   required
-                  class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent @error('email') border-red-500 @enderror"
+                  class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
-                @error('email')
-                  <p class="text-red-200 text-sm mt-1">{{ $message }}</p>
-                @enderror
               </div>
 
-              {{-- Password --}}
               <div class="w-[61%]">
                 <label for="password-desktop" class="block text-white text-lg mb-2">Password :</label>
                 <div class="relative">
@@ -190,7 +163,7 @@
                     name="password"
                     placeholder="Masukkan Password"
                     required
-                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent @error('password') border-red-500 @enderror"
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
                   <button
                     type="button"
@@ -203,14 +176,13 @@
                     </svg>
                   </button>
                 </div>
-                @error('password')
-                  <p class="text-red-200 text-sm mt-1">{{ $message }}</p>
-                @enderror
               </div>
+
+              <div id="error-desktop" class="w-[61%] text-red-300 text-sm hidden"></div>
 
               <button
                 type="submit"
-                class="w-[50%] py-4 rounded-xl bg-[#014D37] text-white text-xl font-semibold lg:w-[61%] hover:bg-green-900 transition-colors"
+                class="w-[50%] py-4 rounded-xl bg-[#014D37] text-white text-xl font-semibold lg:w-[61%] hover:bg-green-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Masuk
               </button>
@@ -231,31 +203,87 @@
   </section>
 
   <script>
-  function togglePassword(inputId, iconId) {
-    const input = document.getElementById(inputId);
-    const icon = document.getElementById(iconId);
-    
-    if (input.type === 'password') {
-      input.type = 'text';
-      icon.innerHTML = `
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"/>
-      `;
-    } else {
-      input.type = 'password';
-      icon.innerHTML = `
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-      `;
+    function togglePassword(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"/>
+        `;
+      } else {
+        input.type = 'password';
+        icon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+        `;
+      }
     }
-  }
+  </script>
 
-  @if(session('success'))
-    alert("{{ session('success') }}");
-  @endif
+  <script>
+    // Wait for app.js to load
+    document.addEventListener('DOMContentLoaded', function() {
+      function showError(formId, message) {
+        const errorDiv = formId === 'mobileForm' ? 
+          document.getElementById('error-mobile') : 
+          document.getElementById('error-desktop');
+        
+        if (errorDiv) {
+          errorDiv.textContent = message;
+          errorDiv.classList.remove('hidden');
+          
+          setTimeout(() => {
+            errorDiv.classList.add('hidden');
+          }, 5000);
+        }
+      }
 
-  @if(session('error'))
-    alert("{{ session('error') }}");
-  @endif
+      function handleSubmit(e) {
+        e.preventDefault();
+        const form = e.target;
+        const email = form.querySelector('input[name="email"]').value;
+        const password = form.querySelector('input[name="password"]').value;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Loading...';
+
+        const errorDiv = form.id === 'mobileForm' ? 
+          document.getElementById('error-mobile') : 
+          document.getElementById('error-desktop');
+        if (errorDiv) {
+          errorDiv.classList.add('hidden');
+        }
+
+        // Use global function from app.js
+        window.signInWithSupabase(email, password)
+          .then(() => {
+            submitBtn.textContent = 'Berhasil! Mengalihkan...';
+          })
+          .catch(err => {
+            console.error('Login error:', err);
+            const errorMessage = err.message || 'Login gagal. Silakan coba lagi.';
+            showError(form.id, errorMessage);
+            
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+          });
+      }
+
+      const mobileForm = document.getElementById('mobileForm');
+      const desktopForm = document.getElementById('desktopForm');
+
+      if (mobileForm) {
+        mobileForm.addEventListener('submit', handleSubmit);
+      }
+
+      if (desktopForm) {
+        desktopForm.addEventListener('submit', handleSubmit);
+      }
+    });
   </script>
 </body>
 </html>

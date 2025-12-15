@@ -9,8 +9,11 @@ export default defineConfig({
         }),
     ],
     server: {
-        port: 5174, // ganti port disini (contoh 5174)
-        host: true, // atau '0.0.0.0' untuk expose ke jaringan
-        // hmr: { host: 'localhost' } // optional bila butuh HMR config custom
+        port: 5174,
+        host: true,
+        hmr: {
+            host: "localhost",
+            port: 5174,
+        },
     },
 });
