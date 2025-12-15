@@ -46,9 +46,33 @@ Route::middleware('web')->group(function () {
     })->name('ksm.riwayat');
 
     Route::get('/profil-ksm', function (Request $request) {
-        $ksm = Ksm::with('pengurusKsm', 'upkp')->first();
-        return view('ksm.profil', compact('ksm'));
-    })->name('ksm.profil');
+        $ksm = Ksm::with(['pengurusKsm', 'upkp'])->first();
+
+        $pengurus = [];
+        $tenagaPria = 0;
+        $tenagaWanita = 0;
+
+        if ($ksm && $ksm->pengurusKsm) {
+            $pk = $ksm->pengurusKsm;
+            $map = [
+                'Ketua' => $pk->ketua_ksm,
+                'Sekretaris' => $pk->sekretaris_ksm,
+                'Bendahara' => $pk->bendahara_ksm,
+                'Seksi Iuran Pengguna' => $pk->seksi_iuran_pengguna_ksm,
+                'Seksi Pengoperasian & Pemliharaan' => $pk->seksi_pengoperasian_dan_pemliharaan_ksm,
+                'Seksi Penyuluhan Kesehatan' => $pk->seksi_penyuluhan_kesehatan_ksm,
+            ];
+            foreach ($map as $jabatan => $nama) {
+                if (!empty($nama)) {
+                    $pengurus[] = ['jabatan' => $jabatan, 'nama' => $nama];
+                }
+            }
+            $tenagaPria = $pk->laki_laki ?? 0;
+            $tenagaWanita = $pk->perempuan ?? 0;
+        }
+
+        return view('ksm.profil', compact('ksm', 'pengurus', 'tenagaPria', 'tenagaWanita'));
+    })->name('ksm.profil');s
 });
 
 /*
@@ -72,8 +96,47 @@ Route::middleware('web')->prefix('upkp')->name('upkp.')->group(function () {
     })->name('konfirmasi');
 
     Route::get('/riwayat', function (Request $request) {
-        $rows = InputanDataSampah::with('ksm')->orderBy('tanggal', 'desc')->get();
-        return view('upkp.riwayat', ['rows' => $rows]);
+        $rowsEloquent = InputanDataSampah::with('ksm', 'upkp')
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        $rows = $rowsEloquent->map(function ($row) {
+            return [
+                'id'         => $row->id,
+                'nama'       => $row->ksm->nama_ksm ?? '-',
+                'nama_upkp'  => $row->upkp->nama_upkp ?? '-',
+                'tanggal'    => $row->tanggal,
+                'total'      => $row->sampah_masuk,
+                'status'     => $row->status === 'verified' ? 'Terverifikasi' : 'Pending',
+            ];
+        });
+
+        $listKsm = $rows->pluck('nama')->unique()->values();
+
+        $stats = [
+            'total_ksm' => Ksm::count(),
+        ];
+        $statsToday = [
+            'laporan_masuk'   => InputanDataSampah::whereDate('tanggal', today())->count(),
+            'total_sampah_m3' => InputanDataSampah::whereDate('tanggal', today())->sum('sampah_masuk') ?? 0,
+        ];
+
+        $selectedRange = [
+            'start' => $request->query('start'),
+            'end'   => $request->query('end'),
+        ];
+        $headerDateLabel = 'Semua';
+        $upkpName = null;
+
+        return view('upkp.riwayat', compact(
+            'rows',
+            'listKsm',
+            'stats',
+            'statsToday',
+            'selectedRange',
+            'headerDateLabel',
+            'upkpName'
+        ));
     })->name('riwayat');
 });
 

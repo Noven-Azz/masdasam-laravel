@@ -1,4 +1,4 @@
-s<?php
+<?php
 
 namespace App\Http\Controllers\Auth;
 
@@ -16,18 +16,29 @@ class SupabaseCallbackController extends Controller
     {
         try {
             $request->validate(['access_token' => 'required|string']);
-            $token = $request->input('access_token');
+            $token = $request->string('access_token');
 
             $supabaseUser = $this->getSupabaseUser($token);
             if (!$supabaseUser) {
                 return response()->json(['error' => 'Invalid Supabase token'], 401);
             }
 
-            $role = $supabaseUser['user_metadata']['role'] ?? $supabaseUser['app_metadata']['role'] ?? null;
-
             $profile = Profile::where('user_id', $supabaseUser['id'])->first();
             if (!$profile) {
                 return response()->json(['error' => 'Profile not found'], 404);
+            }
+
+            // Prioritas: role dari profile → user_metadata → app_metadata → fallback id
+            $role = $profile->role
+                ?? ($supabaseUser['user_metadata']['role'] ?? null)
+                ?? ($supabaseUser['app_metadata']['role'] ?? null);
+
+            if (!$role) {
+                if ($profile->id_ksm) {
+                    $role = 'ksm';
+                } elseif ($profile->id_upkp) {
+                    $role = 'upkp';
+                }
             }
 
             $userData = null;
@@ -38,10 +49,10 @@ class SupabaseCallbackController extends Controller
             }
 
             session([
-                'supabase_user' => $supabaseUser,
+                'supabase_user'  => $supabaseUser,
                 'supabase_token' => $token,
-                'profile' => $profile->toArray(),
-                'user_data' => $userData ? $userData->toArray() : null,
+                'profile'        => $profile->toArray(),
+                'user_data'      => $userData ? $userData->toArray() : null,
             ]);
 
             $redirect = '/';
@@ -61,14 +72,14 @@ class SupabaseCallbackController extends Controller
         try {
             $client = new Client([
                 'base_uri' => rtrim(env('SUPABASE_URL'), '/'),
-                'timeout' => 10,
+                'timeout'  => 10,
             ]);
 
             $response = $client->get('/auth/v1/user', [
                 'headers' => [
                     'Authorization' => 'Bearer '.$token,
-                    'apikey' => env('VITE_SUPABASE_ANON'),
-                    'Accept' => 'application/json',
+                    'apikey'        => env('VITE_SUPABASE_ANON'),
+                    'Accept'        => 'application/json',
                 ],
             ]);
 

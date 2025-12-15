@@ -7,7 +7,7 @@
   <div class="max-w-7xl mx-auto px-4 py-8 pb-12">
     {{-- Header Actions --}}
     <div class="mb-6 flex items-center justify-between">
-      <a href="{{ url('/laporan-ksm') }}" 
+      <a href="{{ route('ksm.laporan-page') }}"
          class="flex items-center space-x-2 text-white hover:text-gray-200 transition-colors duration-200">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -15,10 +15,13 @@
         <span class="text-lg font-semibold">Kembali</span>
       </a>
 
-      <button onclick="handleLogout()" 
-              class="px-4 py-2 bg-white bg-opacity-90 text-red-600 font-semibold rounded-lg shadow hover:bg-opacity-100 transition">
-        Logout
-      </button>
+      <form action="{{ route('logout') }}" method="POST">
+        @csrf
+        <button type="submit"
+                class="px-4 py-2 bg-white bg-opacity-90 text-red-600 font-semibold rounded-lg shadow hover:bg-opacity-100 transition">
+          Logout
+        </button>
+      </form>
     </div>
 
     {{-- Title --}}
@@ -34,21 +37,21 @@
         {{-- Avatar --}}
         <div class="flex justify-center mb-6">
           <div class="bg-green-950 w-32 h-32 md:w-40 md:h-40 rounded-full flex items-center justify-center text-white text-5xl md:text-6xl font-bold shadow-lg">
-            {{ strtoupper(substr($profile['nama_ksm'] ?? 'KSM', 0, 2)) }}
+            {{ strtoupper(substr($ksm->nama_ksm ?? 'KSM', 0, 2)) }}
           </div>
         </div>
 
         {{-- Nama KSM --}}
         <div class="text-center mb-8">
           <h2 class="text-2xl md:text-3xl font-bold text-green-900 mb-3">
-            {{ $profile['nama_ksm'] ?? 'Nama KSM' }}
+            {{ $ksm->nama_ksm ?? 'Nama KSM' }}
           </h2>
           <div class="inline-flex items-center justify-center space-x-2 bg-green-700 bg-opacity-10 px-4 py-2 rounded-full">
             <svg class="w-4 h-4 text-green-700" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
             </svg>
             <p class="text-green-900 text-sm font-semibold">
-              {{ $profile['upkp']['nama_upkp'] ?? 'Belum terdaftar di UPKP' }}
+              {{ $ksm->upkp->nama_upkp ?? 'Belum terdaftar di UPKP' }}
             </p>
           </div>
         </div>
@@ -59,28 +62,28 @@
             <div class="w-2 h-2 bg-green-700 rounded-full mt-1.5"></div>
             <div class="flex-1">
               <span class="text-sm text-gray-600 block">No HP:</span>
-              <span class="font-semibold text-green-900">{{ $profile['no_hp'] ?? '-' }}</span>
+              <span class="font-semibold text-green-900">{{ $ksm->no_hp ?? '-' }}</span>
             </div>
           </div>
           <div class="flex items-start space-x-3">
             <div class="w-2 h-2 bg-green-700 rounded-full mt-1.5"></div>
             <div class="flex-1">
               <span class="text-sm text-gray-600 block">Alamat:</span>
-              <span class="font-semibold text-green-900">{{ $profile['alamat'] ?? '-' }}</span>
+              <span class="font-semibold text-green-900">{{ $ksm->alamat ?? '-' }}</span>
             </div>
           </div>
           <div class="flex items-start space-x-3">
             <div class="w-2 h-2 bg-green-700 rounded-full mt-1.5"></div>
             <div class="flex-1">
               <span class="text-sm text-gray-600 block">Kelurahan:</span>
-              <span class="font-semibold text-green-900">{{ $profile['kelurahan'] ?? '-' }}</span>
+              <span class="font-semibold text-green-900">{{ $ksm->kelurahan ?? '-' }}</span>
             </div>
           </div>
           <div class="flex items-start space-x-3">
             <div class="w-2 h-2 bg-green-700 rounded-full mt-1.5"></div>
             <div class="flex-1">
               <span class="text-sm text-gray-600 block">Kecamatan:</span>
-              <span class="font-semibold text-green-900">{{ $profile['kecamatan'] ?? '-' }}</span>
+              <span class="font-semibold text-green-900">{{ $ksm->kecamatan ?? '-' }}</span>
             </div>
           </div>
         </div>
@@ -91,13 +94,13 @@
           <div class="grid grid-cols-2 gap-4">
             <div class="text-center bg-green-700 bg-opacity-10 rounded-xl p-4">
               <div class="text-3xl font-bold text-green-900">
-                {{ $profile['pengurus_ksm']['laki_laki'] ?? 0 }}
+                {{ $tenagaPria ?? 0 }}
               </div>
               <div class="text-sm text-green-900">Pria</div>
             </div>
             <div class="text-center bg-green-700 bg-opacity-10 rounded-xl p-4">
               <div class="text-3xl font-bold text-green-900">
-                {{ $profile['pengurus_ksm']['perempuan'] ?? 0 }}
+                {{ $tenagaWanita ?? 0 }}
               </div>
               <div class="text-sm text-green-900">Wanita</div>
             </div>
@@ -144,13 +147,4 @@
     </div>
   </div>
 </div>
-
-<script>
-function handleLogout() {
-  if (confirm('Apakah Anda yakin ingin keluar?')) {
-    // Untuk sementara redirect ke login (nanti bisa integrasikan dengan backend)
-    window.location.href = '{{ url("/login") }}';
-  }
-}
-</script>
-@endsections
+@endsection

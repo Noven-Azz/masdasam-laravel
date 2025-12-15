@@ -9,11 +9,10 @@ return new class extends Migration {
     {
         Schema::create('upkp', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->uuid('user_id')->unique()->nullable();
             $table->string('nama_upkp');
-            $table->string('alamat')->nullable();
-            $table->string('kelurahan')->nullable();
-            $table->string('kecamatan')->nullable();
-            $table->string('no_telepon')->nullable();
+            $table->string('nama_operator');
+            $table->string('no_hp_operator');
             $table->timestamps();
         });
     }

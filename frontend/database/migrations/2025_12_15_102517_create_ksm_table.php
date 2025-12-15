@@ -9,29 +9,21 @@ return new class extends Migration {
     {
         Schema::create('ksm', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('nama_ksm');
+            $table->uuid('user_id')->unique()->nullable();
             $table->uuid('id_upkp')->nullable();
-            $table->string('alamat')->nullable();
-            $table->string('kelurahan')->nullable();
-            $table->string('kecamatan')->nullable();
-            $table->string('no_telepon')->nullable();
-            $table->text('deskripsi')->nullable();
+            $table->text('nama_ksm');
+            $table->text('no_hp');
+            $table->text('alamat');
+            $table->text('kelurahan');
+            $table->text('kecamatan');
             $table->timestamps();
-        });
 
-        Schema::create('pengurus_ksm', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('id_ksm');
-            $table->string('nama');
-            $table->string('jabatan')->nullable();
-            $table->string('no_telepon')->nullable();
-            $table->timestamps();
+            $table->foreign('id_upkp')->references('id')->on('upkp')->onDelete('set null');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('pengurus_ksm');
         Schema::dropIfExists('ksm');
     }
 };
