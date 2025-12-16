@@ -3,6 +3,19 @@
 @section('title', 'Profil KSM')
 
 @section('content')
+
+@php
+  $displayName = trim($ksm->nama_ksm ?? 'KSM');
+  $parts = preg_split('/\s+/', $displayName, -1, PREG_SPLIT_NO_EMPTY);
+  if (count($parts) >= 2) {
+      $initials = mb_strtoupper(mb_substr($parts[0], 0, 1) . mb_substr($parts[1], 0, 1));
+  } elseif (count($parts) === 1) {
+      $initials = mb_strtoupper(mb_substr($parts[0], 0, 2));
+  } else {
+      $initials = 'KS';
+  }
+@endphp
+
 <div class="min-h-screen bg-gradient-to-br from-green-700 to-green-900">
   <div class="max-w-7xl mx-auto px-4 py-8 pb-12">
     {{-- Header Actions --}}
@@ -37,14 +50,14 @@
         {{-- Avatar --}}
         <div class="flex justify-center mb-6">
           <div class="bg-green-950 w-32 h-32 md:w-40 md:h-40 rounded-full flex items-center justify-center text-white text-5xl md:text-6xl font-bold shadow-lg">
-            {{ strtoupper(substr($ksm->nama_ksm ?? 'KSM', 0, 2)) }}
+            {{ $initials }}
           </div>
         </div>
 
         {{-- Nama KSM --}}
         <div class="text-center mb-8">
           <h2 class="text-2xl md:text-3xl font-bold text-green-900 mb-3">
-            {{ $ksm->nama_ksm ?? 'Nama KSM' }}
+            {{ $displayName }}
           </h2>
           <div class="inline-flex items-center justify-center space-x-2 bg-green-700 bg-opacity-10 px-4 py-2 rounded-full">
             <svg class="w-4 h-4 text-green-700" fill="currentColor" viewBox="0 0 20 20">

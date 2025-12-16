@@ -7,6 +7,13 @@
   {{-- Header KSM --}}
   @include('components.ksm_header')
 
+  {{-- Success Alert --}}
+  @if(session('success'))
+    <div class="mx-4 mt-4 rounded-md bg-green-50 border border-green-200 px-4 py-3 text-green-800">
+      {{ session('success') }}
+    </div>
+  @endif
+
   {{-- Filter Section --}}
   <div class="flex justify-between items-center mt-4 md:justify-around px-8">
     {{-- Download Button --}}
@@ -45,7 +52,7 @@
           <label class="block text-sm font-medium text-gray-700 mb-2">Tahun</label>
           <select id="yearSelect" class="w-full border border-gray-300 rounded-lg p-2">
             <option value="">Pilih Tahun</option>
-            @for($year = 2025; $year <= date('Y') + 1; $year++)
+            @for($year = 2020; $year <= date('Y') + 1; $year++)
               <option value="{{ $year }}">{{ $year }}</option>
             @endfor
           </select>
@@ -94,67 +101,35 @@
     </div>
   </div>
 
-  {{-- Loading State --}}
-  <div id="loadingState" class="hidden flex flex-col items-center justify-center" style="min-height: calc(100vh - 300px);">
-    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600 mb-4"></div>
-    <p class="text-gray-600">Memuat data...</p>
-  </div>
-
-  {{-- Error State --}}
-  <div id="errorState" class="hidden flex flex-col items-center justify-center px-8 mt-8">
-    <div class="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md w-full">
-      <p class="text-red-800 font-medium text-center">⚠️ <span id="errorMessage">Terjadi kesalahan</span></p>
-      <button onclick="location.reload()" 
-              class="mt-4 w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
-        Coba Lagi
-      </button>
-    </div>
-  </div>
-
   {{-- Data Grid --}}
-  <div id="dataGrid" class="grid grid-cols-1 gap-4 mt-6 px-4 md:grid-cols-2 md:gap-5 lg:grid-cols-3 xl:grid-cols-4 lg:px-8">
-    {{-- Sample Cards --}}
-    <x-card-report-history-ksm
-        upkp-name="UPKP Ajibarang"
-        ksm-name="KSM AJIBARANG"
-        date="2025-10-15"
-        status="verified"
-        :total-sampah-masuk="2.5"
-        :report-id="1"
-    />
+  @if($laporan->count() > 0)
+    <div id="dataGrid" class="grid grid-cols-1 gap-4 mt-6 px-4 md:grid-cols-2 md:gap-5 lg:grid-cols-3 xl:grid-cols-4 lg:px-8">
+      @foreach($laporan as $item)
+        <x-card-report-history-ksm
+            :upkp-name="$item->upkp->nama_upkp ?? 'UPKP Unknown'"
+            :ksm-name="$item->ksm->nama_ksm ?? 'KSM Unknown'"
+            :date="$item->tanggal"
+            :status="$item->sudah_verifikasi ? 'verified' : 'pending'"
+            :total-sampah-masuk="$item->sampah_masuk ?? 0"
+            :report-id="$item->id"
+        />
+      @endforeach
+    </div>
 
-    <x-card-report-history-ksm
-        upkp-name="UPKP Ajibarang"
-        ksm-name="KSM AJIBARANG"
-        date="2025-10-14"
-        status="pending"
-        :total-sampah-masuk="1.8"
-        :report-id="2"
-    />
-
-    <x-card-report-history-ksm
-        upkp-name="UPKP Ajibarang"
-        ksm-name="KSM AJIBARANG"
-        date="2025-10-13"
-        status="verified"
-        :total-sampah-masuk="3.2"
-        :report-id="3"
-    />
-  </div>
-
-  {{-- Empty State --}}
-  <div id="emptyState" class="hidden flex flex-col items-center justify-center" style="min-height: calc(100vh - 300px);">
-    <svg class="w-32 h-32 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-    </svg>
-    <p class="text-gray-600 font-medium text-lg">Tidak ada riwayat laporan</p>
-    <p class="text-sm text-gray-500 mt-2">Periode: <span id="dateRangeText">{{ date('d F Y') }}</span></p>
-  </div>
-
-  {{-- Info Footer --}}
-  <div class="text-center mt-6 text-sm text-gray-600 pb-8">
-    Menampilkan <span id="dataCount" class="font-semibold text-green-700">3</span> laporan
-  </div>
+    {{-- Info Footer --}}
+    <div class="text-center mt-6 text-sm text-gray-600 pb-8">
+      Menampilkan <span id="dataCount" class="font-semibold text-green-700">{{ $laporan->count() }}</span> laporan
+    </div>
+  @else
+    {{-- Empty State --}}
+    <div id="emptyState" class="flex flex-col items-center justify-center" style="min-height: calc(100vh - 300px);">
+      <svg class="w-32 h-32 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+      </svg>
+      <p class="text-gray-600 font-medium text-lg">Tidak ada riwayat laporan</p>
+      <p class="text-sm text-gray-500 mt-2">Belum ada data laporan untuk KSM ini</p>
+    </div>
+  @endif
 </section>
 
 <script>
@@ -172,9 +147,7 @@ function applyMonthYear() {
   const year = document.getElementById('yearSelect').value;
   
   if (month && year) {
-    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-    document.getElementById('monthYearLabel').textContent = `${months[month - 1]} ${year}`;
-    closeMonthYearPicker();
+    window.location.href = `{{ route('ksm.riwayat') }}?month=${month}&year=${year}`;
   }
 }
 
@@ -193,7 +166,8 @@ function applyDateRange() {
   
   if (startDate && endDate) {
     closeDatePicker();
-    alert(`Download data dari ${startDate} sampai ${endDate}`);
+    // TODO: implement download functionality
+    window.location.href = `{{ route('ksm.riwayat') }}?download=1&start=${startDate}&end=${endDate}`;
   }
 }
 </script>
