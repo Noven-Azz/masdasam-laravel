@@ -25,6 +25,7 @@
   {{-- Errors --}}
   @if($errors->any())
     <div class="mb-4 rounded-md bg-red-50 border border-red-200 px-4 py-3 text-red-800">
+      <div class="font-semibold mb-1">⚠️ Terjadi Kesalahan:</div>
       <ul class="list-disc list-inside space-y-1">
         @foreach($errors->all() as $error)
           <li>{{ $error }}</li>
@@ -41,9 +42,12 @@
       name="tanggal"
       form="form-laporan-ksm"
       value="{{ old('tanggal', now()->toDateString()) }}"
-      class="w-full max-w-sm bg-white rounded-md px-4 py-3 text-gray-700 font-medium shadow-sm"
+      class="w-full max-w-sm bg-white rounded-md px-4 py-3 text-gray-700 font-medium shadow-sm @error('tanggal') border-2 border-red-500 @enderror"
       required
     />
+    @error('tanggal')
+      <p class="text-red-200 text-sm mt-2 font-medium">{{ $message }}</p>
+    @enderror
   </div>
 
   <!-- Shortcut Tabs -->
