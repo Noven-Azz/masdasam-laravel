@@ -60,11 +60,6 @@
     </div>
   </div>
 
-  {{-- Detail View (Hidden by default) --}}
-  <div id="detailView" class="hidden mt-6 p-5 rounded-lg shadow-lg bg-white">
-    @include('components.detail-data-sampah')
-  </div>
-
   {{-- List View --}}
   <div id="listView">
     {{-- Actions & Filters --}}
@@ -145,7 +140,7 @@
                 </td>
                 <td class="px-4 py-3 text-center">
                   <button 
-                    onclick="viewDetail({{ $row['id'] }})"
+                    onclick="viewDetail('{{ $row['id'] }}')"
                     class="text-blue-600 hover:text-blue-800 font-medium text-sm">
                     Lihat
                   </button>
@@ -338,7 +333,7 @@ function applyFilters() {
         </span>
       </td>
       <td class="px-4 py-3 text-center">
-        <button onclick="viewDetail(${row.id})" class="text-blue-600 hover:text-blue-800 font-medium text-sm">
+        <button onclick="viewDetail('${row.id}')" class="text-blue-600 hover:text-blue-800 font-medium text-sm">
           Lihat
         </button>
       </td>
@@ -350,8 +345,7 @@ function applyFilters() {
 }
 
 function viewDetail(id) {
-  // Redirect ke halaman detail atau show modal
-  window.location.href = `/riwayat-upkp/detail/${id}`;
+  window.location.href = `/upkp/riwayat/detail/${id}`;
 }
 
 // Initialize

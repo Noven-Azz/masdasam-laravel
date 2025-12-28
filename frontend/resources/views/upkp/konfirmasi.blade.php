@@ -18,11 +18,6 @@
     </div>
   </div>
 
-  {{-- Detail View (Hidden by default) --}}
-  <div id="detailView" class="hidden">
-    @include('components.detail-data-sampah')
-  </div>
-
   {{-- List View --}}
   <div id="listView">
     {{-- Search Bar --}}
@@ -273,8 +268,7 @@ function createCard(data) {
 }
 
 function viewDetail(id) {
-  // Show detail view (nanti integrate dengan component detail)
-  window.location.href = `/konfirmasi-upkp/detail/${id}`;
+  window.location.href = `/upkp/konfirmasi/detail/${id}`;
 }
 
 // Initialize
