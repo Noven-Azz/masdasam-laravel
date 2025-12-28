@@ -20,15 +20,15 @@
 <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
   <select id="filterKsm" class="border border-gray-300 rounded-lg p-2">
     <option value="">Pilih KSM</option>
-    {{-- Nanti populate dari backend --}}
-    <option value="1">KSM Ajibarang</option>
-    <option value="2">KSM Purwokerto</option>
+    @foreach($ksmList ?? [] as $ksm)
+      <option value="{{ $ksm }}">{{ $ksm }}</option>
+    @endforeach
   </select>
 
   <select id="filterBahan" class="border border-gray-300 rounded-lg p-2">
-    <option value="">Pilih Bahan</option>
-    <option value="Pengangkutan">Pengangkutan</option>
+    <option value="">Semua Bahan</option>
     <option value="Pemilahan">Pemilahan</option>
+    <option value="Pengangkutan">Pengangkutan</option>
     <option value="Pemusnahan">Pemusnahan</option>
     <option value="Timbunan">Timbunan</option>
   </select>
@@ -107,7 +107,8 @@ let chartInstance = new Chart(ctx, {
       data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       borderColor: '#017F57',
       backgroundColor: 'rgba(1, 127, 87, 0.1)',
-      tension: 0.4
+      tension: 0.4,
+      fill: true
     }]
   },
   options: {
@@ -121,7 +122,7 @@ let chartInstance = new Chart(ctx, {
   }
 });
 
-// Filter logic (UI-only)
+// Filter logic
 const filters = {
   ksm: document.getElementById('filterKsm'),
   bahan: document.getElementById('filterBahan'),
@@ -132,6 +133,52 @@ const filters = {
 
 const resetBtn = document.getElementById('resetBtn');
 
+// Card elements
+const cards = {
+  rdf: document.getElementById('cardRdf'),
+  murni: document.getElementById('cardMurni'),
+  rongsok: document.getElementById('cardRongsok'),
+  residu: document.getElementById('cardResidu'),
+  bursam: document.getElementById('cardBursam')
+};
+
+// Fetch stats data
+async function fetchStats() {
+  const params = new URLSearchParams();
+  
+  if (filters.ksm.value) params.append('ksm', filters.ksm.value);
+  if (filters.bahan.value) params.append('bahan', filters.bahan.value);
+  if (filters.month.value) params.append('month', filters.month.value);
+  if (filters.year.value) params.append('year', filters.year.value);
+
+  try {
+    const response = await fetch(`/upkp/api/stats?${params}`);
+    const data = await response.json();
+    
+    cards.rdf.textContent = Number(data.rdf).toFixed(2);
+    cards.murni.textContent = Number(data.murni).toFixed(2);
+    cards.rongsok.textContent = Number(data.rongsok).toFixed(2);
+    cards.residu.textContent = Number(data.residu).toFixed(2);
+    cards.bursam.textContent = Number(data.bursam).toFixed(2);
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+  }
+}
+
+// Fetch chart data
+async function fetchChartData(year) {
+  try {
+    const response = await fetch(`/upkp/api/chart?year=${year}`);
+    const result = await response.json();
+    
+    chartInstance.data.datasets[0].data = result.data;
+    chartInstance.update();
+  } catch (error) {
+    console.error('Error fetching chart data:', error);
+  }
+}
+
+// Check if filters are active
 function checkFilters() {
   const hasFilter = Object.values(filters).some(el => el.value !== '');
   if (hasFilter) {
@@ -145,17 +192,33 @@ function checkFilters() {
   }
 }
 
-Object.values(filters).forEach(el => el.addEventListener('change', checkFilters));
-
+// Reset filters
 function resetFilters() {
   Object.values(filters).forEach(el => el.value = '');
+  filters.chartYear.value = new Date().getFullYear();
   checkFilters();
+  fetchStats();
+  fetchChartData(new Date().getFullYear());
+  document.getElementById('chartYearLabel').textContent = new Date().getFullYear();
 }
 
-// Update chart year label
-filters.chartYear.addEventListener('change', function() {
-  document.getElementById('chartYearLabel').textContent = this.value || new Date().getFullYear();
+// Event listeners
+[filters.ksm, filters.bahan, filters.month, filters.year].forEach(el => {
+  el.addEventListener('change', () => {
+    checkFilters();
+    fetchStats();
+  });
 });
+
+filters.chartYear.addEventListener('change', function() {
+  const year = this.value || new Date().getFullYear();
+  document.getElementById('chartYearLabel').textContent = year;
+  fetchChartData(year);
+});
+
+// Initial load
+fetchStats();
+fetchChartData(filters.chartYear.value || new Date().getFullYear());
 </script>
 @endpush
 @endsection
