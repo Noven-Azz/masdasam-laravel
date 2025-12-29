@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\SupabaseCallbackController;
 use App\Models\Ksm;
 use App\Models\Upkp;
 use App\Models\InputanDataSampah;
+use App\Helpers\ExportHelper;
 
 // Public routes
 Route::get('/login', function () {
@@ -27,6 +28,12 @@ Route::post('/logout', function () {
     session()->flush();
     return redirect()->route('login');
 })->name('logout');
+
+// Logout GET route - untuk handle expired session
+Route::get('/logout', function () {
+    session()->flush();
+    return redirect()->route('login')->with('message', 'Session Anda telah berakhir. Silakan login kembali.');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -148,11 +155,31 @@ Route::middleware('web')->group(function () {
         }
 
         $idKsm = $profile['id_ksm'] ?? null;
+        $ksmName = null;
 
         // Fallback cari KSM dari user_id
         if (!$idKsm && !empty($supabaseUser['id'])) {
             $ksm = Ksm::where('user_id', $supabaseUser['id'])->first();
-            if ($ksm) $idKsm = $ksm->id;
+            if ($ksm) {
+                $idKsm = $ksm->id;
+                $ksmName = $ksm->nama_ksm;
+            }
+        } else if ($idKsm) {
+            $ksm = Ksm::find($idKsm);
+            if ($ksm) $ksmName = $ksm->nama_ksm;
+        }
+
+        // Handle download request
+        if ($request->query('download') == '1' && $request->filled('start') && $request->filled('end')) {
+            $query = InputanDataSampah::with(['ksm', 'upkp'])
+                ->where('id_ksm', $idKsm)
+                ->whereBetween('tanggal', [$request->start, $request->end])
+                ->orderBy('tanggal', 'desc');
+            
+            $rows = $query->get();
+            $filename = 'laporan-ksm-' . ($request->start) . '_' . ($request->end) . '.xls';
+            
+            return ExportHelper::exportKsmToExcel($rows, $filename, $ksmName ?? 'KSM');
         }
 
         // Filter by month/year if provided
@@ -169,7 +196,11 @@ Route::middleware('web')->group(function () {
 
         $laporan = $query->get();
 
-        return view('ksm.riwayat', ['laporan' => $laporan]);
+        return view('ksm.riwayat', [
+            'laporan' => $laporan,
+            'month' => $month,
+            'year' => $year
+        ]);
     })->name('ksm.riwayat');
 
     Route::get('/detail-report-ksm/{id}', function ($id) {
@@ -324,8 +355,8 @@ Route::middleware('web')->prefix('upkp')->name('upkp.')->group(function () {
             $query->whereYear('tanggal', $request->year);
         }
 
-        // Hitung berdasarkan bahan yang dipilih
-        $bahan = $request->get('bahan', '');
+        // Hitung berdasarkan bahan yang dipilih (default: Pemilahan)
+        $bahan = $request->get('bahan', 'Pemilahan');
         
         $stats = [
             'rdf' => 0,
@@ -335,32 +366,32 @@ Route::middleware('web')->prefix('upkp')->name('upkp.')->group(function () {
             'bursam' => 0,
         ];
 
-        if ($bahan === 'Pemilahan' || $bahan === '') {
+        if ($bahan === 'Pemilahan') {
             $stats['rdf'] = $query->sum('hasil_pilahan_bahan_rdf') ?? 0;
             $stats['bursam'] = $query->sum('hasil_pilahan_bursam') ?? 0;
             $stats['residu'] = $query->sum('hasil_pilahan_residu') ?? 0;
             $stats['rongsok'] = $query->sum('hasil_pilahan_rongsok') ?? 0;
         }
 
-        if ($bahan === 'Pengangkutan' || $bahan === '') {
-            $stats['rdf'] += $query->sum('pengangkutan_bahan_rdf') ?? 0;
-            $stats['bursam'] += $query->sum('pengangkutan_bursam') ?? 0;
-            $stats['residu'] += $query->sum('pengangkutan_residu') ?? 0;
-            $stats['rongsok'] += $query->sum('pengangkutan_rongsok') ?? 0;
+        if ($bahan === 'Pengangkutan') {
+            $stats['rdf'] = $query->sum('pengangkutan_bahan_rdf') ?? 0;
+            $stats['bursam'] = $query->sum('pengangkutan_bursam') ?? 0;
+            $stats['residu'] = $query->sum('pengangkutan_residu') ?? 0;
+            $stats['rongsok'] = $query->sum('pengangkutan_rongsok') ?? 0;
         }
 
-        if ($bahan === 'Pemusnahan' || $bahan === '') {
+        if ($bahan === 'Pemusnahan') {
             $stats['murni'] = $query->sum('pemusnahan_sampah_murni') ?? 0;
-            $stats['rdf'] += $query->sum('pemusnahan_bahan_rdf') ?? 0;
-            $stats['residu'] += $query->sum('pemusnahan_residu') ?? 0;
+            $stats['rdf'] = $query->sum('pemusnahan_bahan_rdf') ?? 0;
+            $stats['residu'] = $query->sum('pemusnahan_residu') ?? 0;
         }
 
-        if ($bahan === 'Timbunan' || $bahan === '') {
-            $stats['murni'] += $query->sum('timbunan_sampah_murni') ?? 0;
-            $stats['rdf'] += $query->sum('timbunan_bahan_rdf') ?? 0;
-            $stats['residu'] += $query->sum('timbunan_residu') ?? 0;
-            $stats['bursam'] += $query->sum('timbunan_bursam') ?? 0;
-            $stats['rongsok'] += $query->sum('timbunan_rongsok') ?? 0;
+        if ($bahan === 'Timbunan') {
+            $stats['murni'] = $query->sum('timbunan_sampah_murni') ?? 0;
+            $stats['rdf'] = $query->sum('timbunan_bahan_rdf') ?? 0;
+            $stats['residu'] = $query->sum('timbunan_residu') ?? 0;
+            $stats['bursam'] = $query->sum('timbunan_bursam') ?? 0;
+            $stats['rongsok'] = $query->sum('timbunan_rongsok') ?? 0;
         }
 
         return response()->json($stats);
@@ -446,10 +477,15 @@ Route::middleware('web')->prefix('upkp')->name('upkp.')->group(function () {
     })->name('konfirmasi.detail');
 
     Route::get('/riwayat', function (Request $request) {
-        $rowsEloquent = InputanDataSampah::with('ksm', 'upkp')
-            ->where('sudah_verifikasi', true)
-            ->orderBy('tanggal', 'desc')
-            ->get();
+        $query = InputanDataSampah::with('ksm', 'upkp')
+            ->where('sudah_verifikasi', true);
+
+        // Apply date range filter
+        if ($request->filled('start') && $request->filled('end')) {
+            $query->whereBetween('tanggal', [$request->start, $request->end]);
+        }
+
+        $rowsEloquent = $query->orderBy('tanggal', 'desc')->get();
 
         $rows = $rowsEloquent->map(function ($row) {
             return [
@@ -473,10 +509,16 @@ Route::middleware('web')->prefix('upkp')->name('upkp.')->group(function () {
         ];
 
         $selectedRange = [
-            'start' => $request->query('start'),
-            'end'   => $request->query('end'),
+            'start' => $request->query('start', date('Y-m-01')),
+            'end'   => $request->query('end', date('Y-m-d')),
         ];
+        
         $headerDateLabel = 'Semua';
+        if ($request->filled('start') && $request->filled('end')) {
+            $headerDateLabel = \Carbon\Carbon::parse($request->start)->locale('id')->translatedFormat('d F Y') 
+                . ' - ' . \Carbon\Carbon::parse($request->end)->locale('id')->translatedFormat('d F Y');
+        }
+        
         $upkpName = null;
 
         return view('upkp.riwayat', compact(
@@ -533,6 +575,24 @@ Route::middleware('web')->prefix('upkp')->name('upkp.')->group(function () {
         $profile = session('profile', []);
         return view('upkp.detail-report', ['data' => $data, 'profile' => $profile]);
     })->name('riwayat.detail');
+
+    // Export Excel/CSV for riwayat
+    Route::get('/riwayat/export', function (Request $request) {
+        $query = InputanDataSampah::with('ksm', 'upkp')
+            ->where('sudah_verifikasi', true);
+
+        // Apply date range filter
+        if ($request->filled('start') && $request->filled('end')) {
+            $query->whereBetween('tanggal', [$request->start, $request->end]);
+        }
+
+        $rows = $query->orderBy('tanggal', 'desc')->get();
+
+        $filename = 'laporan-upkp-' . ($request->start ?? date('Y-m-01')) . '_' . ($request->end ?? date('Y-m-d')) . '.xls';
+
+        // Export to Excel with styling
+        return ExportHelper::exportUpkpToExcel($rows, $filename);
+    })->name('riwayat.export');
 
     // Detail report UPKP
     Route::get('/detail-report/{id}', function ($id) {
@@ -626,6 +686,15 @@ Route::middleware('web')->prefix('upkp')->name('upkp.')->group(function () {
         
         return response()->json(['success' => true]);
     })->name('verify-laporan');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Route Aliases for backward compatibility
+|--------------------------------------------------------------------------
+*/
+Route::get('/riwayat-upkp', function (Request $request) {
+    return redirect()->route('upkp.riwayat', $request->query());
 });
 
 /*

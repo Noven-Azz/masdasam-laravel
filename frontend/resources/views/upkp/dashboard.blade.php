@@ -26,8 +26,7 @@
   </select>
 
   <select id="filterBahan" class="border border-gray-300 rounded-lg p-2">
-    <option value="">Semua Bahan</option>
-    <option value="Pemilahan">Pemilahan</option>
+    <option value="Pemilahan" selected>Pemilahan</option>
     <option value="Pengangkutan">Pengangkutan</option>
     <option value="Pemusnahan">Pemusnahan</option>
     <option value="Timbunan">Timbunan</option>
@@ -194,7 +193,10 @@ function checkFilters() {
 
 // Reset filters
 function resetFilters() {
-  Object.values(filters).forEach(el => el.value = '');
+  filters.ksm.value = '';
+  filters.bahan.value = 'Pemilahan';
+  filters.month.value = '';
+  filters.year.value = '';
   filters.chartYear.value = new Date().getFullYear();
   checkFilters();
   fetchStats();

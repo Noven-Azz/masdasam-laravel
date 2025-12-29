@@ -268,8 +268,7 @@ function applyDateRange() {
   const end = document.getElementById('dateEnd').value;
   
   if (start && end) {
-    // Reload dengan query params (atau fetch via AJAX)
-    window.location.href = `{{ url('/riwayat-upkp') }}?start=${start}&end=${end}`;
+    window.location.href = `/upkp/riwayat?start=${start}&end=${end}`;
   }
 }
 
@@ -287,7 +286,7 @@ function confirmExport() {
   const end = document.getElementById('exportEnd').value;
   
   if (start && end) {
-    window.location.href = `/api/upkp/history/export.csv?start=${start}&end=${end}`;
+    window.location.href = `/upkp/riwayat/export?start=${start}&end=${end}`;
     closeExportDialog();
   }
 }

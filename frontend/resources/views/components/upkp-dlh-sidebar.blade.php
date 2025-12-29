@@ -120,5 +120,20 @@ function toggleDropdown() {
   const el = document.getElementById('dropdownMenu');
   if (el) el.classList.toggle('hidden');
 }
+
+// Handle logout forms - redirect to GET /logout if CSRF fails
+document.addEventListener('DOMContentLoaded', function() {
+  const logoutForms = document.querySelectorAll('form[action*="logout"]');
+  logoutForms.forEach(form => {
+    form.addEventListener('submit', function(e) {
+      // If CSRF token is missing or form submission fails, redirect to GET logout
+      const csrfToken = form.querySelector('input[name="_token"]');
+      if (!csrfToken || !csrfToken.value) {
+        e.preventDefault();
+        window.location.href = '/logout';
+      }
+    });
+  });
+});
 </script>
 @endpush

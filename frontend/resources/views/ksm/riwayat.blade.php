@@ -28,7 +28,13 @@
     {{-- Month Year Picker Button --}}
     <button onclick="toggleMonthYearPicker()" 
             class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2 px-4 md:py-4 rounded-lg transition-colors duration-200">
-      <span id="monthYearLabel">Bulan</span>
+      <span id="monthYearLabel">
+        @if(request('month') && request('year'))
+          {{ ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'][request('month')] }} {{ request('year') }}
+        @else
+          Bulan
+        @endif
+      </span>
     </button>
   </div>
 
@@ -41,9 +47,9 @@
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Bulan</label>
           <select id="monthSelect" class="w-full border border-gray-300 rounded-lg p-2">
-            <option value="">Pilih Bulan</option>
+            <option value="">Semua Bulan</option>
             @foreach(['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'] as $index => $month)
-              <option value="{{ $index + 1 }}">{{ $month }}</option>
+              <option value="{{ $index + 1 }}" {{ request('month') == ($index + 1) ? 'selected' : '' }}>{{ $month }}</option>
             @endforeach
           </select>
         </div>
@@ -51,15 +57,19 @@
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Tahun</label>
           <select id="yearSelect" class="w-full border border-gray-300 rounded-lg p-2">
-            <option value="">Pilih Tahun</option>
+            <option value="">Semua Tahun</option>
             @for($year = 2020; $year <= date('Y') + 1; $year++)
-              <option value="{{ $year }}">{{ $year }}</option>
+              <option value="{{ $year }}" {{ request('year') == $year ? 'selected' : '' }}>{{ $year }}</option>
             @endfor
           </select>
         </div>
       </div>
 
       <div class="flex gap-2 mt-6">
+        <button onclick="resetFilter()" 
+                class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 rounded-lg transition-colors">
+          Reset
+        </button>
         <button onclick="closeMonthYearPicker()" 
                 class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 rounded-lg transition-colors">
           Batal
@@ -146,9 +156,22 @@ function applyMonthYear() {
   const month = document.getElementById('monthSelect').value;
   const year = document.getElementById('yearSelect').value;
   
-  if (month && year) {
-    window.location.href = `{{ route('ksm.riwayat') }}?month=${month}&year=${year}`;
+  if (month || year) {
+    let url = `{{ route('ksm.riwayat') }}`;
+    const params = [];
+    if (month) params.push(`month=${month}`);
+    if (year) params.push(`year=${year}`);
+    if (params.length > 0) {
+      url += '?' + params.join('&');
+    }
+    window.location.href = url;
+  } else {
+    window.location.href = `{{ route('ksm.riwayat') }}`;
   }
+}
+
+function resetFilter() {
+  window.location.href = `{{ route('ksm.riwayat') }}`;
 }
 
 // Date Range Picker
@@ -166,8 +189,9 @@ function applyDateRange() {
   
   if (startDate && endDate) {
     closeDatePicker();
-    // TODO: implement download functionality
     window.location.href = `{{ route('ksm.riwayat') }}?download=1&start=${startDate}&end=${endDate}`;
+  } else {
+    alert('Silakan pilih tanggal mulai dan tanggal akhir');
   }
 }
 </script>
